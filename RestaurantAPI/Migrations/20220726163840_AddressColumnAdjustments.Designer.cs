@@ -9,8 +9,8 @@ using RestaurantAPI.Entities;
 namespace RestaurantAPI.Migrations
 {
     [DbContext(typeof(RestaurantDbContext))]
-    [Migration("20220726153038_Init")]
-    partial class Init
+    [Migration("20220726163840_AddressColumnAdjustments")]
+    partial class AddressColumnAdjustments
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,21 +28,19 @@ namespace RestaurantAPI.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("PostalCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RestaurantId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Street")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RestaurantId")
-                        .IsUnique();
 
                     b.ToTable("Address");
                 });
@@ -81,7 +79,7 @@ namespace RestaurantAPI.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("AdressId")
+                    b.Property<int>("AddressId")
                         .HasColumnType("int");
 
                     b.Property<string>("Category")
@@ -106,18 +104,10 @@ namespace RestaurantAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AddressId")
+                        .IsUnique();
+
                     b.ToTable("Restaurants");
-                });
-
-            modelBuilder.Entity("RestaurantAPI.Entities.Address", b =>
-                {
-                    b.HasOne("RestaurantAPI.Entities.Restaurant", "Restaurant")
-                        .WithOne("Address")
-                        .HasForeignKey("RestaurantAPI.Entities.Address", "RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Restaurant");
                 });
 
             modelBuilder.Entity("RestaurantAPI.Entities.Dish", b =>
@@ -133,8 +123,22 @@ namespace RestaurantAPI.Migrations
 
             modelBuilder.Entity("RestaurantAPI.Entities.Restaurant", b =>
                 {
-                    b.Navigation("Address");
+                    b.HasOne("RestaurantAPI.Entities.Address", "Address")
+                        .WithOne("Restaurant")
+                        .HasForeignKey("RestaurantAPI.Entities.Restaurant", "AddressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
+                    b.Navigation("Address");
+                });
+
+            modelBuilder.Entity("RestaurantAPI.Entities.Address", b =>
+                {
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("RestaurantAPI.Entities.Restaurant", b =>
+                {
                     b.Navigation("Dishes");
                 });
 #pragma warning restore 612, 618
