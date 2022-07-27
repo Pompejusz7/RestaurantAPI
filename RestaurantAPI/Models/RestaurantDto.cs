@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace RestaurantAPI.Models
 {
@@ -9,8 +10,11 @@ namespace RestaurantAPI.Models
         public string Description { get; set; }
         public string Category { get; set; }
         public bool HasDelivery { get; set; }
-
+        [Required]
+        [MaxLength(25)]
         public string City { get; set; }
+        [Required]
+        [MaxLength(25)]
         public string Street { get; set; }
         public string PostalCode { get; set; }
 
