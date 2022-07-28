@@ -10,6 +10,7 @@ using System.Linq;
 namespace RestaurantAPI.Controllers
 {
     [Route("api/restaurant")]
+    [ApiController]
     public class RestaurantController : ControllerBase
     {
 
@@ -40,12 +41,6 @@ namespace RestaurantAPI.Controllers
         [HttpPost]
         public ActionResult CreateRestaurant([FromBody] CreateRestaurantDto dto)
         {
-
-            if(!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             int addedId = _restaurantService.CreateRestaurant(dto);
 
             return Created($"/api/restaurant/{addedId}", null);
@@ -54,9 +49,7 @@ namespace RestaurantAPI.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteRestaurant([FromRoute]int id)
         {
-            bool result = _restaurantService.DeleteRestaurant(id);
-
-            if (!result) return NotFound();
+            _restaurantService.DeleteRestaurant(id);
 
             return NoContent();
         }
@@ -64,11 +57,7 @@ namespace RestaurantAPI.Controllers
         [HttpPut("{id}")]
         public ActionResult PutRestaurant([FromRoute] int id, [FromBody]UpdateRestaurantDto restaurantDto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var result = _restaurantService.UpdateRestaurant(restaurantDto, id);
-
-            if (!result) return NotFound();
+            _restaurantService.UpdateRestaurant(restaurantDto, id);
 
             return Ok();
         }
