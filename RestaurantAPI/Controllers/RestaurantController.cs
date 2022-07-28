@@ -60,5 +60,17 @@ namespace RestaurantAPI.Controllers
 
             return NoContent();
         }
+
+        [HttpPut("{id}")]
+        public ActionResult PutRestaurant([FromRoute] int id, [FromBody]UpdateRestaurantDto restaurantDto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var result = _restaurantService.UpdateRestaurant(restaurantDto, id);
+
+            if (!result) return NotFound();
+
+            return Ok();
+        }
     }
 }
