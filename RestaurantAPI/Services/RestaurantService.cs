@@ -62,7 +62,7 @@ namespace RestaurantAPI.Services
 
         public void DeleteRestaurant(int id)
         {
-            _logger.LogError($"Restaurant with id: {id} DELETE action Invoked");
+            _logger.LogInformation($"Restaurant with id: {id} DELETE action Invoked");
             var restaurantToDelete = _context.Restaurants.SingleOrDefault(x => x.Id == id);
 
             if(restaurantToDelete == null) throw new NotFoundException("Restaurant not found");
