@@ -7,6 +7,8 @@ using RestaurantAPI.Models;
 using RestaurantAPI.Services;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace RestaurantAPI.Controllers
 {
@@ -24,9 +26,10 @@ namespace RestaurantAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Restaurant>> GetAll()
+        [Authorize(Policy = "AtLeast20")]
+        public async Task<ActionResult<IEnumerable<Restaurant>>> GetAll()
         {
-            var resturantsDtos =_restaurantService.GetAll();
+            var resturantsDtos = await _restaurantService.GetAll();
 
             return Ok(resturantsDtos);
         }
