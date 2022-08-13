@@ -27,9 +27,9 @@ namespace RestaurantAPI.Controllers
 
         [HttpGet]
         [Authorize(Policy = "AtLeast20")]
-        public async Task<ActionResult<IEnumerable<Restaurant>>> GetAll()
+        public async Task<ActionResult<IEnumerable<Restaurant>>> GetAll([FromQuery] RestaurantQuery query)
         {
-            var resturantsDtos = await _restaurantService.GetAll();
+            var resturantsDtos = await _restaurantService.GetAll(query);
 
             return Ok(resturantsDtos);
         }

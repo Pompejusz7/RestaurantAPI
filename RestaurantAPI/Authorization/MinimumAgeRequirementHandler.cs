@@ -15,6 +15,8 @@ namespace RestaurantAPI.Authorization
         }
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, MinimumAgeRequirement requirement)
         {
+            if(context.User.Claims == null) return Task.CompletedTask;
+
             var dateOfBirth = DateTime.Parse(context.User.FindFirst(c => c.Type == "DateOfBirth").Value);
             var userEmail = context.User.FindFirst(c => c.Type == ClaimTypes.Name).Value;
 

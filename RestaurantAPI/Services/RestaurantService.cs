@@ -6,9 +6,11 @@ using RestaurantAPI.Authorization;
 using RestaurantAPI.Entities;
 using RestaurantAPI.Exceptions;
 using RestaurantAPI.Models;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -46,17 +48,42 @@ namespace RestaurantAPI.Services
             return resturantDto;
         }
 
-        public async Task<IEnumerable<RestaurantDto>> GetAll()
+        public async Task<PageResult<RestaurantDto>> GetAll(RestaurantQuery query)
         {
-            var resturants = await _context
+            var baseQuery =  _context
               .Restaurants
               .Include(r => r.Address)
               .Include(r => r.Dishes)
+              .Where(r => query.SearchPhrase == null || (r.Name.ToLower().Contains(query.SearchPhrase.ToLower()) || r.Description.ToLower().Contains(query.SearchPhrase.ToLower())));
+
+            if(string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<Restaurant, object>>>
+                {
+                    {nameof(Restaurant.Name), r=> r.Name },
+                    {nameof(Restaurant.Description), r=> r.Description },
+                    {nameof(Restaurant.Category), r=> r.Category }
+                };
+
+                var selectedColumn = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC ?
+                    baseQuery.OrderBy(selectedColumn) : 
+                    baseQuery.OrderByDescending(selectedColumn);
+            }
+
+            var resturants = await baseQuery
+              .Skip(query.PageSize * (query.PageNumber - 1))
+              .Take(query.PageSize)
               .ToListAsync();
+
+            var totalitemsCount = baseQuery.Count();
 
             var resturantsDtos = _mapper.Map<List<RestaurantDto>>(resturants);
 
-            return resturantsDtos;
+            var result = new PageResult<RestaurantDto>(resturantsDtos, totalitemsCount, query.PageSize, query.PageNumber);
+
+            return result;
         }
 
         public int CreateRestaurant(CreateRestaurantDto dto)
