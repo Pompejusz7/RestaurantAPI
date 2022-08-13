@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -69,7 +70,7 @@ namespace RestaurantAPI
             services.AddScoped<IAuthorizationHandler, MinimumAgeRequirementHandler>();
             services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
             services.AddControllers().AddFluentValidation();
-            services.AddDbContext<RestaurantDbContext>();
+            services.AddDbContext<RestaurantDbContext>(options => options.UseSqlServer(Configuration["ConnectionString"]));
 
             services.AddScoped<RestaurantSeeder>();
             services.AddAutoMapper(this.GetType().Assembly);
@@ -86,11 +87,25 @@ namespace RestaurantAPI
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddHttpContextAccessor();
             services.AddSwaggerGen();
+
+            ///Cors
+            services.AddCors(options =>
+            {
+                options.AddPolicy("FrontEndClient", builder => 
+                builder.AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithOrigins(Configuration["AllowedOrigins"])
+                );
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, RestaurantSeeder seeder)
         {
+            app.UseResponseCaching();
+            app.UseStaticFiles();
+            app.UseCors("FrontEndClient");
+
             seeder.Seed();
 
             if (env.IsDevelopment())
